@@ -437,6 +437,49 @@ function nuevaRemision(){
   document.getElementById("btn-enviar").innerHTML="✓ Registrar y enviar";
   addItem();irPaso(1);
 }
+
+// ── Consultas IA ──────────────────────────────────────────────
+function preguntaRapida(p) {
+  document.getElementById("input-consulta").value = p;
+  enviarConsulta();
+}
+
+async function enviarConsulta() {
+  const input = document.getElementById("input-consulta");
+  const pregunta = input.value.trim();
+  if (!pregunta) return;
+  input.value = "";
+
+  const chat = document.getElementById("chat-consultas");
+
+  const mu = document.createElement("div");
+  mu.style.cssText = "background:var(--azul);color:#fff;padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:14px;align-self:flex-end;max-width:85%;margin-left:auto";
+  mu.textContent = pregunta;
+  chat.appendChild(mu);
+
+  const mi = document.createElement("div");
+  mi.style.cssText = "background:#fff;border:1px solid var(--borde);padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:14px;max-width:90%;line-height:1.6";
+  mi.innerHTML = '<span class="spin" style="border-color:rgba(26,58,92,.2);border-top-color:var(--azul)"></span> Consultando datos…';
+  chat.appendChild(mi);
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const resp = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ accion: "consultar", pregunta }),
+      redirect: "follow"
+    });
+    const txt = await resp.text();
+    const data = JSON.parse(txt);
+    mi.innerHTML = data.ok
+      ? data.respuesta.replace(/\n/g, "<br>")
+      : "⚠ " + (data.error || "Error al consultar");
+  } catch(e) {
+    mi.innerHTML = "⚠ Error: " + e.message;
+  }
+  chat.scrollTop = chat.scrollHeight;
+}
 </script>
 
 <!-- PASO 5: CONSULTAS IA -->
@@ -461,52 +504,5 @@ function nuevaRemision(){
     <button onclick="enviarConsulta()" style="padding:11px 18px;background:var(--azul);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">→</button>
   </div>
 </div>
-
-<script>
-// ── Consultas IA ──────────────────────────────────────────────
-function preguntaRapida(p) {
-  document.getElementById("input-consulta").value = p;
-  enviarConsulta();
-}
-
-async function enviarConsulta() {
-  const input = document.getElementById("input-consulta");
-  const pregunta = input.value.trim();
-  if (!pregunta) return;
-  input.value = "";
-
-  const chat = document.getElementById("chat-consultas");
-
-  // Mensaje usuario
-  const mu = document.createElement("div");
-  mu.style.cssText = "background:var(--azul);color:#fff;padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:14px;align-self:flex-end;max-width:85%;margin-left:auto";
-  mu.textContent = pregunta;
-  chat.appendChild(mu);
-
-  // Mensaje IA cargando
-  const mi = document.createElement("div");
-  mi.style.cssText = "background:#fff;border:1px solid var(--borde);padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:14px;max-width:90%;line-height:1.6";
-  mi.innerHTML = '<span class="spin" style="border-color:rgba(26,58,92,.2);border-top-color:var(--azul)"></span> Consultando datos…';
-  chat.appendChild(mi);
-  chat.scrollTop = chat.scrollHeight;
-
-  try {
-    const resp = await fetch(API, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({ accion: "consultar", pregunta }),
-      redirect: "follow"
-    });
-    const data = JSON.parse(await resp.text());
-    mi.innerHTML = data.ok
-      ? data.respuesta.replace(/
-/g, "<br>")
-      : "⚠ " + (data.error || "Error al consultar");
-  } catch(e) {
-    mi.innerHTML = "⚠ Error de conexión: " + e.message;
-  }
-  chat.scrollTop = chat.scrollHeight;
-}
-</script>
 </body>
 </html>
