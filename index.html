@@ -87,6 +87,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
     <div class="step-tab" id="tab-2" onclick="irPaso(2)">2·Datos</div>
     <div class="step-tab" id="tab-3" onclick="irPaso(3)">3·Productos</div>
     <div class="step-tab" id="tab-4" onclick="irPaso(4)">4·Enviar</div>
+    <div class="step-tab" id="tab-5" onclick="irPaso(5)" style="background:rgba(232,160,32,.15)">📊</div>
   </div>
 </div>
 
@@ -169,7 +170,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 <div id="view-4" class="view">
   <div id="panel-resumen">
     <div class="card"><div class="card-title">✅ Confirmar y enviar</div><div id="resumen-contenido"></div></div>
-    <div class="card"><div class="card-title">📧 Correo de prueba</div><div style="font-size:12px;color:var(--muted)">bodega.ramalza@gmail.com</div></div>
+    <div class="card"><div class="card-title">📧 Correo de prueba</div><div style="font-size:12px;color:var(--muted)">ramalza@hotmail.com y 6 destinatarios más</div></div>
     <div id="msg-4"></div>
     <button class="btn btn-verde" id="btn-enviar" onclick="enviarRemision()">✓ Registrar y enviar</button>
     <button class="btn btn-outline" onclick="irPaso(3)">← Volver</button>
@@ -191,7 +192,7 @@ html,body{min-height:100%;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI
 </div>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbze28tOqmG7EUcecipA5-zG7UlBx_i3KKbu254YIOAwiogyhXmUBbLIgdQzMvzyAosxEg/exec";
+const API = "https://script.google.com/macros/s/AKfycbz0jgFYso21P4bAWTG4J1iw-AgnVI8Drze48x2cEEgZveyEA1Hhqtwf42dFrtVfDKLy/exec";
 const REFS = ["R4","R5","R6","R7","R8","R8 3,0","R10","E5","E6","E7","E8","E10","BC4","BC5","BC6","BC7","BC8","BC10","T5","T6","T7","T8","T8-3,0","T10","T10 -3,0","TOR4","TOR5","TOR6","TOR7","TOR8","TOR10","R9","R11","PREFA #4","PREFA #5","PREFA #6","PREFA #7","PREFA #8","PREFA #10","PERNO","T6-4","T7-5","T8-6","T10-7","UT4","UT5","UT6","UT7"];
 let fotoBase64=null, fileId=null, itemCount=0;
 
@@ -204,10 +205,11 @@ document.addEventListener("DOMContentLoaded",()=>{
 function irPaso(n){
   document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
   document.getElementById("view-"+n).classList.add("active");
-  for(let i=1;i<=4;i++){
+  for(let i=1;i<=5;i++){
     const t=document.getElementById("tab-"+i);
+    if(!t)continue;
     t.classList.remove("active","done");
-    if(i<n)t.classList.add("done");
+    if(i<n&&i<5)t.classList.add("done");
     if(i===n)t.classList.add("active");
   }
   window.scrollTo(0,0);
@@ -411,7 +413,7 @@ function mostrarExito(datos){
   document.getElementById("exito-lista").innerHTML=[
     {ok:true,txt:"Registrado en Seguimiento de Remisiones"},
     {ok:items.length>0&&datos.estado==="ENTREGADO",txt:items.length>0&&datos.estado==="ENTREGADO"?"Inventario descontado · "+items.length+" referencia(s)":"Inventario no modificado ("+datos.estado+")"},
-    {ok:true,txt:"Correo enviado a bodega.ramalza@gmail.com"},
+    {ok:true,txt:"Correo enviado a 7 destinatarios"},
     {ok:!!fileId,txt:fileId?"Foto guardada en Google Drive":"Sin foto adjunta"},
   ].map(c=>`<li><span class="ci ${c.ok?"ci-ok":"ci-warn"}">${c.ok?"✓":"!"}</span><span>${c.txt}</span></li>`).join("");
 }
@@ -434,6 +436,76 @@ function nuevaRemision(){
   document.getElementById("btn-enviar").disabled=false;
   document.getElementById("btn-enviar").innerHTML="✓ Registrar y enviar";
   addItem();irPaso(1);
+}
+</script>
+
+<!-- PASO 5: CONSULTAS IA -->
+<div id="view-5" class="view">
+  <div style="margin-bottom:14px">
+    <div style="font-size:18px;font-weight:700;color:var(--azul);margin-bottom:4px">📊 Consultas e historial</div>
+    <div style="font-size:13px;color:var(--muted)">Pregunta cualquier cosa sobre tus entregas, clientes o referencias.</div>
+  </div>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <button onclick="preguntaRapida('¿Cuántas remisiones hay registradas en total?')" style="padding:7px 12px;border-radius:20px;border:1px solid var(--borde);background:#fff;font-size:12px;color:var(--azul);cursor:pointer">Total remisiones</button>
+    <button onclick="preguntaRapida('¿Qué empresa ha recibido más entregas?')" style="padding:7px 12px;border-radius:20px;border:1px solid var(--borde);background:#fff;font-size:12px;color:var(--azul);cursor:pointer">Mayor cliente</button>
+    <button onclick="preguntaRapida('¿Cuál es la referencia más entregada?')" style="padding:7px 12px;border-radius:20px;border:1px solid var(--borde);background:#fff;font-size:12px;color:var(--azul);cursor:pointer">Ref. más vendida</button>
+    <button onclick="preguntaRapida('Resumen de entregas del último mes')" style="padding:7px 12px;border-radius:20px;border:1px solid var(--borde);background:#fff;font-size:12px;color:var(--azul);cursor:pointer">Último mes</button>
+    <button onclick="preguntaRapida('¿Cuántas remisiones están pendientes?')" style="padding:7px 12px;border-radius:20px;border:1px solid var(--borde);background:#fff;font-size:12px;color:var(--azul);cursor:pointer">Pendientes</button>
+  </div>
+
+  <div id="chat-consultas" style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px;min-height:200px"></div>
+
+  <div style="display:flex;gap:8px;position:sticky;bottom:16px">
+    <input id="input-consulta" placeholder="Ej: ¿Cuántos R5 entregué a Constructora Experta?" style="flex:1;padding:11px 13px;border:1.5px solid var(--borde);border-radius:8px;font-size:14px;font-family:inherit;outline:none" onkeydown="if(event.key==='Enter')enviarConsulta()">
+    <button onclick="enviarConsulta()" style="padding:11px 18px;background:var(--azul);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">→</button>
+  </div>
+</div>
+
+<script>
+// ── Consultas IA ──────────────────────────────────────────────
+function preguntaRapida(p) {
+  document.getElementById("input-consulta").value = p;
+  enviarConsulta();
+}
+
+async function enviarConsulta() {
+  const input = document.getElementById("input-consulta");
+  const pregunta = input.value.trim();
+  if (!pregunta) return;
+  input.value = "";
+
+  const chat = document.getElementById("chat-consultas");
+
+  // Mensaje usuario
+  const mu = document.createElement("div");
+  mu.style.cssText = "background:var(--azul);color:#fff;padding:10px 14px;border-radius:12px 12px 4px 12px;font-size:14px;align-self:flex-end;max-width:85%;margin-left:auto";
+  mu.textContent = pregunta;
+  chat.appendChild(mu);
+
+  // Mensaje IA cargando
+  const mi = document.createElement("div");
+  mi.style.cssText = "background:#fff;border:1px solid var(--borde);padding:10px 14px;border-radius:12px 12px 12px 4px;font-size:14px;max-width:90%;line-height:1.6";
+  mi.innerHTML = '<span class="spin" style="border-color:rgba(26,58,92,.2);border-top-color:var(--azul)"></span> Consultando datos…';
+  chat.appendChild(mi);
+  chat.scrollTop = chat.scrollHeight;
+
+  try {
+    const resp = await fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ accion: "consultar", pregunta }),
+      redirect: "follow"
+    });
+    const data = JSON.parse(await resp.text());
+    mi.innerHTML = data.ok
+      ? data.respuesta.replace(/
+/g, "<br>")
+      : "⚠ " + (data.error || "Error al consultar");
+  } catch(e) {
+    mi.innerHTML = "⚠ Error de conexión: " + e.message;
+  }
+  chat.scrollTop = chat.scrollHeight;
 }
 </script>
 </body>
